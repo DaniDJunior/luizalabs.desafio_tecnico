@@ -19,6 +19,15 @@ namespace luizalabs.desafio_tecnico.Extensions
             services.AddTransient<ILegacyManager, LegacyManager>();
             services.AddTransient<ILegacyKafkaManager, LegacyKafkaManager>();
             services.AddTransient<ILegacyAdapter, LegacyAdapter>();
+
+            services.AddTransient<IUserManager, UserManager>();
+            services.AddTransient<IUserAdapter, UserAdapter>();
+
+            services.AddTransient<IProductManager, ProductManager>();
+            services.AddTransient<IProductAdapter, ProductAdapter>();
+
+            services.AddTransient<IOrderManager, OrderManager>();
+            services.AddTransient<IOrderAdapter, OrderAdapter>();
         }
     }
 }
