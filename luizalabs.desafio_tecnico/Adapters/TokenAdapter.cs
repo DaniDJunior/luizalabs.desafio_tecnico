@@ -5,9 +5,9 @@ namespace luizalabs.desafio_tecnico.Adapters
 {
     public class TokenAdapter : ITokenAdapter
     {
-        public Models.Token.TokenOut FromModel(string token, string userName, string type, DateTime expires)
+        public Models.Token.TokenView ToView(string token, string userName, string type, DateTime expires)
         {
-            Models.Token.TokenOut tokenReturn = new Models.Token.TokenOut();
+            Models.Token.TokenView tokenReturn = new Models.Token.TokenView();
             tokenReturn.data = token;
             tokenReturn.type = type;
             tokenReturn.expires = expires;

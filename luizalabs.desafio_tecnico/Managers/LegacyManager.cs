@@ -23,21 +23,46 @@ namespace luizalabs.desafio_tecnico.Managers
             KafkaManager = kafkaManager;
         }
 
-        public async Task<List<Models.Legacy.LegacyFile>> GetListAsync()
+        public async Task<Models.Legacy.LegacyRequest?> GetAsync(Guid id)
         {
-            return await DataContext.Requests.ToListAsync();
+            Models.Legacy.LegacyRequest? request = await DataContext.Requests.FirstOrDefaultAsync(request => request.request_id == id);
+            if (request != null)
+            {
+                Load(request);
+            }
+            return request;
         }
 
-        public async Task<Models.Legacy.LegacyFile> StartRequestAsync(string fileName, Guid id)
+        public async Task<List<Models.Legacy.LegacyRequest>> GetListAsync()
+        {
+            List<Models.Legacy.LegacyRequest> requests = await DataContext.Requests.ToListAsync();
+            requests.ForEach(request => Load(request));
+            return requests;
+        }
+
+        public List<Models.Legacy.LegacyRequest> FindByFileName(string fileName)
+        {
+            List<Models.Legacy.LegacyRequest> requests = DataContext.Requests.Where(request => request.file_name == fileName).ToList();
+            requests.ForEach(request => Load(request));
+            return requests;
+        }
+
+        public Models.Legacy.LegacyRequest Load(Models.Legacy.LegacyRequest request)
+        {
+            request.Lines = DataContext.RequestsLines.Where(line => line.request_id == request.request_id).ToList();
+            return request;
+        }
+
+        public async Task<Models.Legacy.LegacyRequest> StartRequestAsync(string fileName, Guid id)
         {
             int lines_count = (await System.IO.File.ReadAllLinesAsync(BkpPatch + id.ToString())).Length;
 
-            Models.Legacy.LegacyFile request = new Models.Legacy.LegacyFile();
+            Models.Legacy.LegacyRequest request = new Models.Legacy.LegacyRequest();
             request.request_id = id;
             request.total_lines = lines_count;
             request.file_name = fileName;
             request.status = Enuns.LegacyFileStatus.RECEIVED;
-            request.Lines = new List<Models.Legacy.LegacyData>();
+            request.Lines = new List<Models.Legacy.LegacyRequestLine>();
 
             await DataContext.Requests.AddAsync(request);
             await DataContext.SaveChangesAsync();

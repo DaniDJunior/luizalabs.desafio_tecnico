@@ -1,6 +1,0 @@
-@luizalabs.desafio_tecnico_HostAddress = http://localhost:5147
-
-GET {{luizalabs.desafio_tecnico_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

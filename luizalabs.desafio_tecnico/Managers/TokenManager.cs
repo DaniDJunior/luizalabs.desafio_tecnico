@@ -86,9 +86,9 @@ namespace luizalabs.desafio_tecnico.Managers
             return retorno;
         }
 
-        public TokenData ValidateToken(string token)
+        public Token ValidateToken(string token)
         {
-            TokenData returnValue = new TokenData();
+            Token returnValue = new Token();
             if (!string.IsNullOrEmpty(token))
             {
                 returnValue.ok = true;

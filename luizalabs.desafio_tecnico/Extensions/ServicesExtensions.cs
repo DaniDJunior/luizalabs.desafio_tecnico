@@ -11,6 +11,8 @@ namespace luizalabs.desafio_tecnico.Extensions
         {
             services.AddHostedService<LegacyFileKafkaService>();
             services.AddHostedService<LegacyLineKafkaService>();
+            services.AddHostedService<LegacyDataKafkaService>();
+            services.AddHostedService<LegacyFinalKafkaService>();
         }
     }
 }

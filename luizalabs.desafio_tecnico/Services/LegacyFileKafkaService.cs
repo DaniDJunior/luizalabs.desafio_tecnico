@@ -1,6 +1,8 @@
 ﻿using Confluent.Kafka;
+using Confluent.Kafka.Admin;
 using luizalabs.desafio_tecnico.Enuns;
 using luizalabs.desafio_tecnico.Interfaces;
+using luizalabs.desafio_tecnico.Managers;
 using luizalabs.desafio_tecnico.Models.Kafka;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
@@ -13,12 +15,17 @@ namespace luizalabs.desafio_tecnico.Services
 
         private readonly ILogger<LegacyFileKafkaService> Logger;
 
-        private readonly IKafkaManager KafkaManager;
+        private ILegacyKafkaManager LegacyKafkaManager;
 
-        public LegacyFileKafkaService(IConfiguration configuration, ILogger<LegacyFileKafkaService> logger, IKafkaManager kafkaManager)
+        private string BootstrapServers;
+
+        public LegacyFileKafkaService(IConfiguration configuration, ILogger<LegacyFileKafkaService> logger, ILegacyKafkaManager legacyKafkaManager)
         {
             Logger = logger;
-            KafkaManager = kafkaManager;
+            LegacyKafkaManager = legacyKafkaManager;
+
+            string? bootstrapServer = configuration["Kafka:BootstrapServers"];
+            BootstrapServers = bootstrapServer != null ? bootstrapServer : string.Empty;
 
             var consumerConfig = new ConsumerConfig
             {
@@ -41,6 +48,19 @@ namespace luizalabs.desafio_tecnico.Services
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await Task.Yield();
+
+            using (var adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = BootstrapServers }).Build())
+            {
+                try
+                {
+                    await adminClient.CreateTopicsAsync(new TopicSpecification[] {
+                    new TopicSpecification { Name = KafkaTopics.LUIZALABS_PROCESS_FILE, ReplicationFactor = 1, NumPartitions = 1 } });
+                }
+                catch (CreateTopicsException e)
+                {
+                    Console.WriteLine($"An error occured creating topic {e.Results[0].Topic}: {e.Results[0].Error.Reason}");
+                }
+            }
 
             if (Consumer != null)
             {
@@ -96,12 +116,7 @@ namespace luizalabs.desafio_tecnico.Services
             ProcessFile? process = JsonConvert.DeserializeObject<ProcessFile>(message);
             if (process == null) { return string.Empty; }
 
-            string[] lines = await System.IO.File.ReadAllLinesAsync(process.file_name);
-
-            for (int i = 0; i < lines.Length; i++)
-            {
-                await KafkaManager.SendProcessLineAsync(lines[i], i, process.request_id);
-            }
+            await LegacyKafkaManager.ProcessFileAsync(process.file_name, process.request_id);
 
             return message;
         }

@@ -10,5 +10,9 @@ namespace luizalabs.desafio_tecnico.Interfaces
         public Task<object> SendProcessLineAsync(string line, int linePosition, Guid requestId);
 
         public Task<object> SendProcessFileAsync(string fileName, Guid requestId);
+
+        public Task<object> SendProcessFinalAsync(Guid requestId);
+
+        public Task<object> SendProcessDataAsync(Guid requestLineId);
     }
 }

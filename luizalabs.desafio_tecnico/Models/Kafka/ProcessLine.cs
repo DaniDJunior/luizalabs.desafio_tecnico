@@ -5,5 +5,10 @@
         public string line { get; set; }
         public int line_position { get; set; }
         public Guid request_id { get; set; }
+
+        public ProcessLine()
+        {
+            line = string.Empty;
+        }
     }
 }

@@ -42,7 +42,7 @@ namespace luizalabs.desafio_tecnico.Controllers
 
                     string token = TokenManager.CreateToken(userName, expires);
 
-                    return StatusCode((int)HttpStatusCode.OK, TokenAdapter.FromModel(token, userName, "bearer", expires));
+                    return StatusCode((int)HttpStatusCode.OK, TokenAdapter.ToView(token, userName, "bearer", expires));
                 }
             }
             return StatusCode((int)HttpStatusCode.Unauthorized, "Username ou password errados");

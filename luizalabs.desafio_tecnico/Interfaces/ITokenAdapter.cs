@@ -2,6 +2,6 @@
 {
     public interface ITokenAdapter
     {
-        public Models.Token.TokenOut FromModel(string token, string userName, string type, DateTime expires);
+        public Models.Token.TokenView ToView(string token, string userName, string type, DateTime expires);
     }
 }

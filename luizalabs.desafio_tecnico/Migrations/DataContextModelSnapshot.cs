@@ -22,12 +22,35 @@ namespace luizalabs.desafio_tecnico.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Legacy.LegacyData", b =>
+            modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Legacy.LegacyRequest", b =>
                 {
-                    b.Property<Guid>("request_line_id")
+                    b.Property<Guid>("request_id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<int>("line")
+                    b.Property<string>("file_name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("total_lines")
+                        .HasColumnType("int");
+
+                    b.HasKey("request_id");
+
+                    b.ToTable("requests", (string)null);
+                });
+
+            modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Legacy.LegacyRequestLine", b =>
+                {
+                    b.Property<Guid>("request_line_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("line_number")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("order_date")
@@ -54,45 +77,137 @@ namespace luizalabs.desafio_tecnico.Migrations
 
                     b.HasKey("request_line_id");
 
+                    b.HasIndex("request_id");
+
                     b.ToTable("requests_lines", (string)null);
                 });
 
-            modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Legacy.LegacyFile", b =>
+            modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Order.Order", b =>
                 {
-                    b.Property<Guid>("request_id")
+                    b.Property<Guid>("order_id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("file_name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<DateTime>("date")
+                        .HasColumnType("datetime(6)");
 
-                    b.Property<string>("status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("total_lines")
+                    b.Property<int?>("legacy_order_id")
                         .HasColumnType("int");
 
-                    b.HasKey("request_id");
+                    b.Property<Guid>("user_id")
+                        .HasColumnType("char(36)");
 
-                    b.ToTable("requests", (string)null);
+                    b.HasKey("order_id");
+
+                    b.HasIndex("user_id");
+
+                    b.ToTable("orders", (string)null);
                 });
 
-            modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Legacy.LegacyData", b =>
+            modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Order.OrderProduct", b =>
                 {
-                    b.HasOne("luizalabs.desafio_tecnico.Models.Legacy.LegacyFile", "file")
+                    b.Property<Guid>("order_id")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("product_id")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("order_id", "product_id");
+
+                    b.HasIndex("product_id");
+
+                    b.ToTable("orders_products", (string)null);
+                });
+
+            modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Product.Product", b =>
+                {
+                    b.Property<Guid>("product_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<int?>("legacy_product_id")
+                        .HasColumnType("int");
+
+                    b.Property<float>("value")
+                        .HasColumnType("float");
+
+                    b.HasKey("product_id");
+
+                    b.ToTable("products", (string)null);
+                });
+
+            modelBuilder.Entity("luizalabs.desafio_tecnico.Models.User.User", b =>
+                {
+                    b.Property<Guid>("user_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<int?>("legacy_user_id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("user_id");
+
+                    b.ToTable("users", (string)null);
+                });
+
+            modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Legacy.LegacyRequestLine", b =>
+                {
+                    b.HasOne("luizalabs.desafio_tecnico.Models.Legacy.LegacyRequest", "request")
                         .WithMany("Lines")
-                        .HasForeignKey("request_line_id")
+                        .HasForeignKey("request_id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("request");
+                });
+
+            modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Order.Order", b =>
+                {
+                    b.HasOne("luizalabs.desafio_tecnico.Models.User.User", "user")
+                        .WithMany("orders")
+                        .HasForeignKey("user_id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("user");
+                });
+
+            modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Order.OrderProduct", b =>
+                {
+                    b.HasOne("luizalabs.desafio_tecnico.Models.Order.Order", "order")
+                        .WithMany("products")
+                        .HasForeignKey("order_id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("luizalabs.desafio_tecnico.Models.Product.Product", "product")
+                        .WithMany()
+                        .HasForeignKey("product_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("file");
+                    b.Navigation("order");
+
+                    b.Navigation("product");
                 });
 
-            modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Legacy.LegacyFile", b =>
+            modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Legacy.LegacyRequest", b =>
                 {
                     b.Navigation("Lines");
+                });
+
+            modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Order.Order", b =>
+                {
+                    b.Navigation("products");
+                });
+
+            modelBuilder.Entity("luizalabs.desafio_tecnico.Models.User.User", b =>
+                {
+                    b.Navigation("orders");
                 });
 #pragma warning restore 612, 618
         }

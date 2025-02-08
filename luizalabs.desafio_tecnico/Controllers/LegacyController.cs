@@ -9,6 +9,7 @@ namespace luizalabs.desafio_tecnico.Controllers
 {
     [ApiController]
     [ApiVersion("1.0")]
+    [AuthFilter]
     [Route("api/v{version:apiVersion}/Legacy")]
     public class LegacyController : ControllerBase
     {
@@ -20,22 +21,44 @@ namespace luizalabs.desafio_tecnico.Controllers
         public LegacyController(ILogger<LegacyController> logger, IConfiguration configuration, ILegacyAdapter legacyAdapter, ILegacyManager legacyManager)
         {
             Logger = logger;
-            BkpPatch = configuration["Legacy:Bkp_Patch"];
+            string? bkp_patch = configuration["Legacy:Bkp_Patch"];
+            BkpPatch = bkp_patch == null ? string.Empty : bkp_patch;
             LegacyAdapter = legacyAdapter;
             LegacyManager = legacyManager;
         }
 
         [HttpGet]
         [Route("")]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get(string? fileName)
         {
-            return StatusCode((int)HttpStatusCode.OK, LegacyAdapter.FromListModel(await LegacyManager.GetListAsync()));
+            if (fileName == null)
+            {
+                return StatusCode((int)HttpStatusCode.OK, LegacyAdapter.ToListView(await LegacyManager.GetListAsync()));
+            }
+            else
+            {
+                return StatusCode((int)HttpStatusCode.OK, LegacyAdapter.ToListView(LegacyManager.FindByFileName(fileName)));
+            }
+        }
+
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<IActionResult> GetId(Guid id)
+        {
+            var request = await LegacyManager.GetAsync(id);
+            if (request != null)
+            {
+                return StatusCode((int)HttpStatusCode.OK, LegacyAdapter.ToView(request));
+            }
+            else
+            {
+                return StatusCode((int)HttpStatusCode.NotFound);
+            }
         }
 
         [HttpPost]
-        [AuthFilter]
         [Route("")]
-        public async Task<IActionResult> Update([FromForm] IFormFile file)
+        public async Task<IActionResult> Start([FromForm] IFormFile file)
         {
             if (file.Length > 0)
             {
@@ -53,9 +76,9 @@ namespace luizalabs.desafio_tecnico.Controllers
                         filestream.Flush();
                     }
                     
-                    Models.Legacy.LegacyFile legacyFile = await LegacyManager.StartRequestAsync(file.FileName, id);
+                    Models.Legacy.LegacyRequest legacyFile = await LegacyManager.StartRequestAsync(file.FileName, id);
 
-                    return StatusCode((int)HttpStatusCode.OK, LegacyAdapter.FromModel(legacyFile));
+                    return StatusCode((int)HttpStatusCode.Created, LegacyAdapter.ToView(legacyFile));
                 }
                 catch (Exception ex)
                 {

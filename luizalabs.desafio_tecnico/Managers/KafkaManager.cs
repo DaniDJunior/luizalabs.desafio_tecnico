@@ -10,15 +10,13 @@ namespace luizalabs.desafio_tecnico.Managers
     public class KafkaManager : IKafkaManager
     {
         private readonly ILogger<KafkaManager> Logger;
-        private readonly ILegacyKafkaManager LegacyFileManager;
         private ProducerConfig Config { get; set; }
 
         private string bkp_patch { get; set; }
 
-        public KafkaManager(ILogger<KafkaManager> logger, IConfiguration configuration, ILegacyKafkaManager legacyFileManager)
+        public KafkaManager(ILogger<KafkaManager> logger, IConfiguration configuration)
         {
             Logger = logger;
-            LegacyFileManager = legacyFileManager;
             Config = new ProducerConfig
             {
                 BootstrapServers = configuration["Kafka:BootstrapServers"]
@@ -36,6 +34,20 @@ namespace luizalabs.desafio_tecnico.Managers
         {
             string message = JsonConvert.SerializeObject(new ProcessLine() { line = line, line_position = linePosition, request_id = requestId });
             await SendPostAsync(KafkaTopics.LUIZALABS_PROCESS_LINE, message);
+            return Task.CompletedTask;
+        }
+
+        public async Task<object> SendProcessFinalAsync(Guid requestId)
+        {
+            string message = JsonConvert.SerializeObject(new ProcessFinal() { request_id = requestId });
+            await SendPostAsync(KafkaTopics.LUIZALABS_PROCESS_FINAL, message);
+            return Task.CompletedTask;
+        }
+
+        public async Task<object> SendProcessDataAsync(Guid requestLineId)
+        {
+            string message = JsonConvert.SerializeObject(new ProcessData() { request_line_id = requestLineId });
+            await SendPostAsync(KafkaTopics.LUIZALABS_PROCESS_DATA, message);
             return Task.CompletedTask;
         }
 

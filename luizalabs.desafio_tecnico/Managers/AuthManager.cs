@@ -18,7 +18,7 @@ namespace luizalabs.desafio_tecnico.Managers
 
         public async Task<bool> ValidBearerAuth(string authHeader, List<string> roles, ActionExecutingContext context)
         {
-            Models.Token.TokenData token = TokenManager.ValidateToken(authHeader);
+            Models.Token.Token token = TokenManager.ValidateToken(authHeader);
             if (!token.valid)
             {
                 return false;

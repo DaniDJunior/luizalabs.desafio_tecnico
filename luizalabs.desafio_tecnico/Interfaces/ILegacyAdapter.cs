@@ -2,8 +2,8 @@
 {
     public interface ILegacyAdapter
     {
-        public List<Models.Legacy.LegacyOut> FromListModel(List<Models.Legacy.LegacyFile> itens);
+        public List<Models.Legacy.LegacyView> ToListView(List<Models.Legacy.LegacyRequest> itens);
 
-        public Models.Legacy.LegacyOut FromModel(Models.Legacy.LegacyFile item);
+        public Models.Legacy.LegacyView ToView(Models.Legacy.LegacyRequest item);
     }
 }

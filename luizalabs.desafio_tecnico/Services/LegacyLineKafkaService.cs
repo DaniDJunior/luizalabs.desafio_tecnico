@@ -1,4 +1,5 @@
 ﻿using Confluent.Kafka;
+using Confluent.Kafka.Admin;
 using luizalabs.desafio_tecnico.Enuns;
 using luizalabs.desafio_tecnico.Interfaces;
 using luizalabs.desafio_tecnico.Models.Kafka;
@@ -8,16 +9,21 @@ namespace luizalabs.desafio_tecnico.Services
 {
     public class LegacyLineKafkaService : BackgroundService
     {
-        private readonly IConsumer<Ignore, string> Consumer;
+        private readonly IConsumer<Ignore, string>? Consumer;
 
         private readonly ILogger<LegacyLineKafkaService> Logger;
 
-        private ILegacyKafkaManager LegacyFileManager;
+        private ILegacyKafkaManager LegacyKafkaManager;
 
-        public LegacyLineKafkaService(IConfiguration configuration, ILogger<LegacyLineKafkaService> logger, ILegacyKafkaManager legacyFileManager)
+        private string BootstrapServers;
+
+        public LegacyLineKafkaService(IConfiguration configuration, ILogger<LegacyLineKafkaService> logger, ILegacyKafkaManager legacyKafkaManager)
         {
             Logger = logger;
-            LegacyFileManager = legacyFileManager;
+            LegacyKafkaManager = legacyKafkaManager;
+
+            string? bootstrapServer = configuration["Kafka:BootstrapServers"];
+            BootstrapServers = bootstrapServer != null ? bootstrapServer : string.Empty;
 
             var consumerConfig = new ConsumerConfig
             {
@@ -40,6 +46,19 @@ namespace luizalabs.desafio_tecnico.Services
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await Task.Yield();
+
+            using (var adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = BootstrapServers }).Build())
+            {
+                try
+                {
+                    await adminClient.CreateTopicsAsync(new TopicSpecification[] {
+                    new TopicSpecification { Name = KafkaTopics.LUIZALABS_PROCESS_LINE, ReplicationFactor = 1, NumPartitions = 1 } });
+                }
+                catch (CreateTopicsException e)
+                {
+                    Console.WriteLine($"An error occured creating topic {e.Results[0].Topic}: {e.Results[0].Error.Reason}");
+                }
+            }
 
             if (Consumer != null)
             {
@@ -65,24 +84,27 @@ namespace luizalabs.desafio_tecnico.Services
 
         public async Task<object> ProcessKafkaMessageAsync(CancellationToken stoppingToken)
         {
-            try
+            if (Consumer != null)
             {
-                var consumeResult = Consumer.Consume(stoppingToken);
-
-                var message = consumeResult.Message.Value;
-
-                var returnmsg = string.Empty;
-
-                if (!string.IsNullOrEmpty(message))
+                try
                 {
-                    returnmsg = await TopicProcessLine(message);
-                }
+                    var consumeResult = Consumer.Consume(stoppingToken);
 
-                Logger.LogInformation($"Received inventory update: {returnmsg}");
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError($"Error processing Kafka message: {ex.Message}");
+                    var message = consumeResult.Message.Value;
+
+                    var returnmsg = string.Empty;
+
+                    if (!string.IsNullOrEmpty(message))
+                    {
+                        returnmsg = await TopicProcessLine(message);
+                    }
+
+                    Logger.LogInformation($"Received inventory update: {returnmsg}");
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError($"Error processing Kafka message: {ex.Message}");
+                }
             }
             return Task.CompletedTask;
         }
@@ -93,7 +115,7 @@ namespace luizalabs.desafio_tecnico.Services
 
             if (process == null) { return string.Empty; }
 
-            await LegacyFileManager.ProcessLineAsync(process.line, process.line_position, process.request_id);
+            await LegacyKafkaManager.ProcessLineAsync(process.line, process.line_position, process.request_id);
 
             return message;
         }
