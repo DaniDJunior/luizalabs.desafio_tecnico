@@ -20,6 +20,8 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet luizalabs.desafio_tecnico/luizalabs.desafio_tecnico.csproj restore
     - name: Build
       run: dotnet build luizalabs.desafio_tecnico/luizalabs.desafio_tecnico.csproj --no-restore
     - name: Test
