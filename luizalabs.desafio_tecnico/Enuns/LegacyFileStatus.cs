@@ -7,5 +7,6 @@
         public static string ERROR { get { return "ERROR"; } }
         public static string COMPLETE { get { return "COMPLETE"; } }
         public static string COMPLETE_WITH_WARNING { get { return "COMPLETE_WITH_WARNING"; } }
+        public static string COMPLETE_WITH_ERROR { get { return "COMPLETE_WITH_ERROR"; } }
     }
 }

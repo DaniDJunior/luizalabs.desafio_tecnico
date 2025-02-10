@@ -5,6 +5,13 @@ namespace luizalabs.desafio_tecnico.Adapters
 {
     public class UserAdapter : IUserAdapter
     {
+        private readonly IOrderAdapter OrderAdapter;
+
+        public UserAdapter(IOrderAdapter orderAdapter)
+        {
+            OrderAdapter = orderAdapter;
+        }
+
         public List<UserView> ToListView(List<User> itens)
         {
             return itens.Select(item => ToView(item)).ToList();
@@ -32,6 +39,23 @@ namespace luizalabs.desafio_tecnico.Adapters
 
             user.user_id = item.user_id;
             user.name = item.name;
+
+            return user;
+        }
+
+        public List<UserLegacyView> ToListViewLegacy(List<User> itens)
+        {
+            return itens.Select(item => ToViewLegacy(item)).ToList();
+        }
+
+        public UserLegacyView ToViewLegacy(User item)
+        {
+            UserLegacyView user = new UserLegacyView();
+
+            user.user_id = item.legacy_user_id;
+            user.name = item.name;
+
+            user.orders = OrderAdapter.ToListLegacyView(item.orders.ToList());
 
             return user;
         }

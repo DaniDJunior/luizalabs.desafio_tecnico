@@ -52,9 +52,15 @@ try
     builder.Services.AddControllers();
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
+
+    System.IO.StreamReader swaggerDescription = new StreamReader("Swagger.html");
+    string description = swaggerDescription.ReadToEnd();
+    swaggerDescription.Close();
+
+
     builder.Services.AddSwaggerGen(option =>
     {
-        option.SwaggerDoc("v1", new OpenApiInfo { Title = "Desafio LuizaLabs", Version = "v1" });
+        option.SwaggerDoc("v1", new OpenApiInfo { Title = "Desafio LuizaLabs", Description=description, Version = "v1" });
         option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
         {
             In = ParameterLocation.Header,
@@ -79,6 +85,8 @@ try
         }
         });
     });
+
+    swaggerDescription.Close();
 
     var connection = builder.Configuration.GetConnectionString("MySqlConnectionString");
 

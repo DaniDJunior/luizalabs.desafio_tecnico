@@ -3,7 +3,6 @@ using luizalabs.desafio_tecnico.Filters;
 using luizalabs.desafio_tecnico.Interfaces;
 using luizalabs.desafio_tecnico.Managers;
 using luizalabs.desafio_tecnico.Models.Order;
-using luizalabs.desafio_tecnico.Models.Product;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -17,28 +16,28 @@ namespace luizalabs.desafio_tecnico.Controllers
     public class OrderController : ControllerBase
     {
         private readonly ILogger<OrderController> Logger;
-        private readonly IOrderManager OrderManager;
+        private readonly IOrderData OrderData;
         private readonly IOrderAdapter OrderAdapter;
 
-        public OrderController(ILogger<OrderController> logger, IOrderAdapter orderAdapter, IOrderManager orderManager)
+        public OrderController(ILogger<OrderController> logger, IOrderAdapter orderAdapter, IOrderData orderData)
         {
             Logger = logger;
             OrderAdapter = orderAdapter;
-            OrderManager = orderManager;
+            OrderData = orderData;
         }
 
         [HttpGet]
         [Route("")]
         public async Task<IActionResult> Get()
         {
-            return StatusCode((int)HttpStatusCode.OK, OrderAdapter.ToListView(await OrderManager.GetListAsync()));
+            return StatusCode((int)HttpStatusCode.OK, OrderAdapter.ToListView(await OrderData.GetListAsync()));
         }
 
         [HttpGet]
-        [Route("{id}")]
-        public async Task<IActionResult> GetId(Guid id)
+        [Route("{order_id}")]
+        public async Task<IActionResult> GetId(Guid order_id)
         {
-            var order = await OrderManager.GetId(id);
+            var order = await OrderData.GetByIdAsync(order_id);
             if (order == null)
             {
                 return StatusCode((int)HttpStatusCode.NotFound);
@@ -54,34 +53,48 @@ namespace luizalabs.desafio_tecnico.Controllers
         public async Task<IActionResult> Post([FromBody] OrderInsert model)
         {
             var order = OrderAdapter.ToModel(model);
-            order = await OrderManager.Save(order);
+            order = await OrderData.SaveAsync(order);
+            return StatusCode((int)HttpStatusCode.Created, OrderAdapter.ToView(order));
+        }
+
+        [HttpPost]
+        [Route("{order_id}/Product")]
+        public async Task<IActionResult> PostProduct([FromBody] OrderProductInsert model, Guid order_id)
+        {
+            Models.Order.Order? order = await OrderData.GetByIdAsync(order_id);
+            if (order == null)
+            {
+                return StatusCode((int)HttpStatusCode.NotFound);
+            }
+            var orderProduct = OrderAdapter.ToProductModel(model, order);
+            order = await OrderData.AddProductAsync(order, orderProduct);
             return StatusCode((int)HttpStatusCode.Created, OrderAdapter.ToView(order));
         }
 
         [HttpPut]
-        [Route("{id}")]
-        public async Task<IActionResult> Put([FromBody] OrderUpdate model, Guid id)
+        [Route("{order_id}")]
+        public async Task<IActionResult> Put([FromBody] OrderUpdate model, Guid order_id)
         {
-            Models.Order.Order? order = await OrderManager.GetId(id);
+            Models.Order.Order? order = await OrderData.GetByIdAsync(order_id);
             if (order == null)
             {
                 return StatusCode((int)HttpStatusCode.NotFound);
             }
             order = OrderAdapter.ToModel(model, order);
-            order = await OrderManager.Save(order);
+            order = await OrderData.SaveAsync(order);
             return StatusCode((int)HttpStatusCode.OK, OrderAdapter.ToView(order));
         }
 
         [HttpDelete]
-        [Route("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        [Route("{order_id}")]
+        public async Task<IActionResult> Delete(Guid order_id)
         {
-            Models.Order.Order? order = await OrderManager.GetId(id);
+            Models.Order.Order? order = await OrderData.GetByIdAsync(order_id);
             if (order == null)
             {
                 return StatusCode((int)HttpStatusCode.NotFound);
             }
-            if (await OrderManager.Delete(order))
+            if (await OrderData.DeleteAsync(order))
             {
                 return StatusCode((int)HttpStatusCode.OK);
             }

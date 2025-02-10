@@ -13,11 +13,11 @@ namespace luizalabs.desafio_tecnico.Services
 
         private readonly ILogger<LegacyDataKafkaService> Logger;
 
-        private ILegacyKafkaManager LegacyKafkaManager;
+        private ILegacyLogic LegacyKafkaManager;
 
         private string BootstrapServers;
 
-        public LegacyDataKafkaService(IConfiguration configuration, ILogger<LegacyDataKafkaService> logger, ILegacyKafkaManager legacyKafkaManager)
+        public LegacyDataKafkaService(IConfiguration configuration, ILogger<LegacyDataKafkaService> logger, ILegacyLogic legacyKafkaManager)
         {
             Logger = logger;
             LegacyKafkaManager = legacyKafkaManager;

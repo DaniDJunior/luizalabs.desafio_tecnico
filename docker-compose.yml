@@ -52,6 +52,8 @@ services:
       - 3316
   luizalabs.desafio_tecnico:
     image: ${DOCKER_REGISTRY-}luizalabsdesafiotecnico
+    ports:
+      - 8086:8081
     build:
       context: .
       dockerfile: luizalabs.desafio_tecnico/Dockerfile

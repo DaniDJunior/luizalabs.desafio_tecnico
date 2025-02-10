@@ -1,13 +1,19 @@
-﻿namespace luizalabs.desafio_tecnico.Interfaces
+﻿using luizalabs.desafio_tecnico.Models.User;
+
+namespace luizalabs.desafio_tecnico.Interfaces
 {
     public interface IUserAdapter
     {
-        public List<Models.User.UserView> ToListView(List<Models.User.User> itens);
+        public List<UserView> ToListView(List<User> itens);
 
-        public Models.User.UserView ToView(Models.User.User item);
+        public List<UserLegacyView> ToListViewLegacy(List<User> itens);
 
-        public Models.User.User ToModel(Models.User.UserInsert item);
+        public UserLegacyView ToViewLegacy(User item);
 
-        public Models.User.User ToModel(Models.User.UserUpdate item, Models.User.User user);
+        public UserView ToView(User item);
+
+        public User ToModel(UserInsert item);
+
+        public User ToModel(UserUpdate item, User user);
     }
 }

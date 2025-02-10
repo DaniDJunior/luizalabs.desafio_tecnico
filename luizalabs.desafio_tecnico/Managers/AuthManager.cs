@@ -9,9 +9,9 @@ namespace luizalabs.desafio_tecnico.Managers
 {
     public class AuthManager : IAuthManager
     {
-        private ITokenManager TokenManager;
+        private ITokenLogic TokenManager;
 
-        public AuthManager(ITokenManager managerToken)
+        public AuthManager(ITokenLogic managerToken)
         {
             TokenManager = managerToken;
         }

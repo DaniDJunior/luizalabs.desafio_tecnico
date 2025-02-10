@@ -1,13 +1,21 @@
-﻿namespace luizalabs.desafio_tecnico.Interfaces
+﻿using luizalabs.desafio_tecnico.Models.Order;
+
+namespace luizalabs.desafio_tecnico.Interfaces
 {
     public interface IOrderAdapter
     {
-        public List<Models.Order.OrderView> ToListView(List<Models.Order.Order> itens);
+        public List<OrderLegacyView> ToListLegacyView(List<Order> itens);
 
-        public Models.Order.OrderView ToView(Models.Order.Order item);
+        public List<OrderView> ToListView(List<Order> itens);
 
-        public Models.Order.Order ToModel(Models.Order.OrderInsert item);
+        public OrderView ToView(Order item);
 
-        public Models.Order.Order ToModel(Models.Order.OrderUpdate item, Models.Order.Order order);
+        public OrderLegacyView ToLegacyView(Order item);
+
+        public OrderProduct ToProductModel(OrderProductInsert item, Order order);
+
+        public Order ToModel(OrderInsert item);
+
+        public Order ToModel(OrderUpdate item, Order order);
     }
 }

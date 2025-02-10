@@ -44,6 +44,32 @@ namespace luizalabs.desafio_tecnico.Migrations
                     b.ToTable("requests", (string)null);
                 });
 
+            modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Legacy.LegacyRequestError", b =>
+                {
+                    b.Property<Guid>("request_error_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("level")
+                        .HasColumnType("int");
+
+                    b.Property<int>("line_number")
+                        .HasColumnType("int");
+
+                    b.Property<string>("message")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("request_id")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("request_error_id");
+
+                    b.HasIndex("request_id");
+
+                    b.ToTable("requests_errors", (string)null);
+                });
+
             modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Legacy.LegacyRequestLine", b =>
                 {
                     b.Property<Guid>("request_line_id")
@@ -106,21 +132,6 @@ namespace luizalabs.desafio_tecnico.Migrations
 
             modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Order.OrderProduct", b =>
                 {
-                    b.Property<Guid>("order_id")
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid>("product_id")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("order_id", "product_id");
-
-                    b.HasIndex("product_id");
-
-                    b.ToTable("orders_products", (string)null);
-                });
-
-            modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Product.Product", b =>
-                {
                     b.Property<Guid>("product_id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
@@ -128,12 +139,17 @@ namespace luizalabs.desafio_tecnico.Migrations
                     b.Property<int?>("legacy_product_id")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("order_id")
+                        .HasColumnType("char(36)");
+
                     b.Property<float>("value")
                         .HasColumnType("float");
 
                     b.HasKey("product_id");
 
-                    b.ToTable("products", (string)null);
+                    b.HasIndex("order_id");
+
+                    b.ToTable("orders_products", (string)null);
                 });
 
             modelBuilder.Entity("luizalabs.desafio_tecnico.Models.User.User", b =>
@@ -154,12 +170,23 @@ namespace luizalabs.desafio_tecnico.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Legacy.LegacyRequestError", b =>
+                {
+                    b.HasOne("luizalabs.desafio_tecnico.Models.Legacy.LegacyRequest", "request")
+                        .WithMany("errors")
+                        .HasForeignKey("request_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("request");
+                });
+
             modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Legacy.LegacyRequestLine", b =>
                 {
                     b.HasOne("luizalabs.desafio_tecnico.Models.Legacy.LegacyRequest", "request")
-                        .WithMany("Lines")
+                        .WithMany("lines")
                         .HasForeignKey("request_id")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("request");
@@ -170,7 +197,7 @@ namespace luizalabs.desafio_tecnico.Migrations
                     b.HasOne("luizalabs.desafio_tecnico.Models.User.User", "user")
                         .WithMany("orders")
                         .HasForeignKey("user_id")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("user");
@@ -181,23 +208,17 @@ namespace luizalabs.desafio_tecnico.Migrations
                     b.HasOne("luizalabs.desafio_tecnico.Models.Order.Order", "order")
                         .WithMany("products")
                         .HasForeignKey("order_id")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("luizalabs.desafio_tecnico.Models.Product.Product", "product")
-                        .WithMany()
-                        .HasForeignKey("product_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("order");
-
-                    b.Navigation("product");
                 });
 
             modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Legacy.LegacyRequest", b =>
                 {
-                    b.Navigation("Lines");
+                    b.Navigation("errors");
+
+                    b.Navigation("lines");
                 });
 
             modelBuilder.Entity("luizalabs.desafio_tecnico.Models.Order.Order", b =>

@@ -1,4 +1,5 @@
 ﻿using luizalabs.desafio_tecnico.Interfaces;
+using luizalabs.desafio_tecnico.Models.Token;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -11,10 +12,10 @@ namespace luizalabs.desafio_tecnico.Controllers
     public class LoginController : ControllerBase
     {
         private ILogger<LoginController> Logger;
-        private ITokenManager TokenManager { get; set; }
+        private ITokenLogic TokenManager { get; set; }
         private ITokenAdapter TokenAdapter { get; set; }
 
-        public LoginController(ILogger<LoginController> logger, ITokenManager tokenManager, ITokenAdapter tokenAdapter) { 
+        public LoginController(ILogger<LoginController> logger, ITokenLogic tokenManager, ITokenAdapter tokenAdapter) { 
             Logger = logger;
             TokenManager = tokenManager;
             TokenAdapter = tokenAdapter;

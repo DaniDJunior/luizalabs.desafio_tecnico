@@ -1,8 +1,10 @@
 ﻿using luizalabs.desafio_tecnico.Filters;
 using luizalabs.desafio_tecnico.Interfaces;
+using luizalabs.desafio_tecnico.Logics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System.Net;
 
 namespace luizalabs.desafio_tecnico.Controllers
@@ -14,17 +16,19 @@ namespace luizalabs.desafio_tecnico.Controllers
     public class LegacyController : ControllerBase
     {
         private readonly ILogger<LegacyController> Logger;
-        private readonly ILegacyManager LegacyManager;
+        private readonly ILegacyData LegacyData;
+        private readonly ILegacyLogic LegacyLogic;
         private readonly ILegacyAdapter LegacyAdapter;
         private readonly string BkpPatch;
 
-        public LegacyController(ILogger<LegacyController> logger, IConfiguration configuration, ILegacyAdapter legacyAdapter, ILegacyManager legacyManager)
+        public LegacyController(ILogger<LegacyController> logger, IConfiguration configuration, ILegacyAdapter legacyAdapter, ILegacyLogic legacyLogic, ILegacyData legacyData)
         {
             Logger = logger;
             string? bkp_patch = configuration["Legacy:Bkp_Patch"];
             BkpPatch = bkp_patch == null ? string.Empty : bkp_patch;
             LegacyAdapter = legacyAdapter;
-            LegacyManager = legacyManager;
+            LegacyLogic = legacyLogic;
+            LegacyData = legacyData;
         }
 
         [HttpGet]
@@ -33,19 +37,19 @@ namespace luizalabs.desafio_tecnico.Controllers
         {
             if (fileName == null)
             {
-                return StatusCode((int)HttpStatusCode.OK, LegacyAdapter.ToListView(await LegacyManager.GetListAsync()));
+                return StatusCode((int)HttpStatusCode.OK, LegacyAdapter.ToListView(await LegacyData.GetListAsync()));
             }
             else
             {
-                return StatusCode((int)HttpStatusCode.OK, LegacyAdapter.ToListView(LegacyManager.FindByFileName(fileName)));
+                return StatusCode((int)HttpStatusCode.OK, LegacyAdapter.ToListView(LegacyData.FindByFileName(fileName)));
             }
         }
 
         [HttpGet]
-        [Route("{id}")]
-        public async Task<IActionResult> GetId(Guid id)
+        [Route("{request_id}")]
+        public async Task<IActionResult> GetId(Guid request_id)
         {
-            var request = await LegacyManager.GetAsync(id);
+            var request = await LegacyData.GetByIdAsync(request_id);
             if (request != null)
             {
                 return StatusCode((int)HttpStatusCode.OK, LegacyAdapter.ToView(request));
@@ -54,6 +58,22 @@ namespace luizalabs.desafio_tecnico.Controllers
             {
                 return StatusCode((int)HttpStatusCode.NotFound);
             }
+        }
+
+        [HttpPost]
+        [Route("{request_id}/reprocess/{line}")]
+        public async Task<IActionResult> Reprocess(Guid request_id, int line)
+        {
+            await LegacyLogic.ReprocessRequestAsync(request_id, line);
+            return StatusCode((int)HttpStatusCode.OK);
+        }
+
+        [HttpPost]
+        [Route("{request_id}/reprocess")]
+        public async Task<IActionResult> ReprocessAll(Guid request_id)
+        {
+            await LegacyLogic.ReprocessRequestAsync(request_id, null);
+            return StatusCode((int)HttpStatusCode.OK);
         }
 
         [HttpPost]
@@ -76,7 +96,7 @@ namespace luizalabs.desafio_tecnico.Controllers
                         filestream.Flush();
                     }
                     
-                    Models.Legacy.LegacyRequest legacyFile = await LegacyManager.StartRequestAsync(file.FileName, id);
+                    Models.Legacy.LegacyRequest legacyFile = await LegacyLogic.StartRequestAsync(file.FileName, id);
 
                     return StatusCode((int)HttpStatusCode.Created, LegacyAdapter.ToView(legacyFile));
                 }
