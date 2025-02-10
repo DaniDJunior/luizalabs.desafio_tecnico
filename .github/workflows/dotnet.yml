@@ -22,7 +22,9 @@ jobs:
         dotnet-version: 8.0.x
     - name: Restore dependencies
       run: dotnet restore
+    - name: UseProject
+      run: dotnet watch --project .\luizalabs.desafio_tecnico\luizalabs.desafio_tecnico.csproj
     - name: Build
-      run: dotnet publish luizalabs.desafio_tecnico.sln -c Release -o out
+      run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
