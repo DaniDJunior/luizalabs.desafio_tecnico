@@ -24,5 +24,9 @@ jobs:
       run: dotnet restore luizalabs.desafio_tecnico/luizalabs.desafio_tecnico.csproj
     - name: Build
       run: dotnet build luizalabs.desafio_tecnico/luizalabs.desafio_tecnico.csproj --no-restore
+    - name: Restore test dependencies
+      run: dotnet restore luizalabs.desafio_tecnico.test/luizalabs.desafio_tecnico.test.csproj
+    - name: Build test
+      run: dotnet build luizalabs.desafio_tecnico.test/luizalabs.desafio_tecnico.test.csproj --no-restore
     - name: Test
       run: dotnet test luizalabs.desafio_tecnico.test/luizalabs.desafio_tecnico.test.csproj --no-build --verbosity normal
