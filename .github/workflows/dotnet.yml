@@ -23,6 +23,6 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build luizalabs.desafio_tecnico.sln --no-restore
+      run: dotnet publish luizalabs.desafio_tecnico.sln -c Release -o out
     - name: Test
       run: dotnet test --no-build --verbosity normal
