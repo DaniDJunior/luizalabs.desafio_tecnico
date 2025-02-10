@@ -67,6 +67,23 @@ namespace luizalabs.desafio_tecnico.test.Logic
             await LegacyLogic.ProcessLineAsync(line, 0, request.request_id);
 
             Assert.AreEqual(request.lines.Count, 1);
+            Assert.AreEqual(request.errors.Count, 0);
+
+        }
+
+        [TestMethod]
+        public async Task ProcessLineErrorAsync()
+        {
+            LegacyRequest request = LegacyRequestSample.Sample();
+
+            await LegacyData.SaveAsync(request);
+
+            string line = "000000X017                              Ethan Langworth00000001690000000001      865.1820210409";
+
+            await LegacyLogic.ProcessLineAsync(line, 0, request.request_id);
+
+            Assert.AreEqual(request.lines.Count, 0);
+            Assert.AreEqual(request.errors.Count, 1);
 
         }
 
@@ -75,11 +92,9 @@ namespace luizalabs.desafio_tecnico.test.Logic
         {
             LegacyRequest request = LegacyRequestSample.Sample();
 
+            request = LegacyRequestSample.SampleAddLine(request);
+
             await LegacyData.SaveAsync(request);
-
-            string line = "0000000017                              Ethan Langworth00000001690000000001      865.1820210409";
-
-            await LegacyLogic.ProcessLineAsync(line, 0, request.request_id);
 
             await LegacyLogic.ProcessDataAsync(request.lines.First().request_line_id);
 

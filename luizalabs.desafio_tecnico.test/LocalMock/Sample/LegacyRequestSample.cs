@@ -19,5 +19,25 @@ namespace luizalabs.desafio_tecnico.test.LocalMock.Sample
 
             return request;
         }
+
+        public static Models.Legacy.LegacyRequest SampleAddLine(Models.Legacy.LegacyRequest request)
+        {
+            Models.Legacy.LegacyRequestLine requestLine = new Models.Legacy.LegacyRequestLine();
+
+            requestLine.request_id = request.request_id;
+            requestLine.request = request;
+            requestLine.product_value = ComunSample.RandomFloat();
+            requestLine.line_number = ComunSample.RandomInt();
+            requestLine.product_id = ComunSample.RandomInt();
+            requestLine.order_date = DateTime.Now;
+            requestLine.order_id = ComunSample.RandomInt();
+            requestLine.user_id = ComunSample.RandomInt();
+            requestLine.user_name = ComunSample.RandomString(45);
+            requestLine.request_line_id = Guid.NewGuid();
+
+            request.lines.Add(requestLine);
+
+            return request;
+        }
     }
 }
