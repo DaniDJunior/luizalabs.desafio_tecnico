@@ -76,14 +76,32 @@ namespace luizalabs.desafio_tecnico.test.LocalMock.Data
             return request.lines.FirstOrDefault(rl => rl.line_number == lineNumber);
         }
 
-        public Task<LegacyRequest> AddErrorAsync(LegacyRequest request, int lineNumber, string message)
+        public async Task<LegacyRequest> AddErrorAsync(LegacyRequest request, int lineNumber, string message)
         {
-            throw new NotImplementedException();
+            LegacyRequestError requestError = new LegacyRequestError();
+            requestError.request = request;
+            requestError.request_id = request.request_id;
+            requestError.request_error_id = Guid.NewGuid();
+            requestError.message = message;
+            requestError.line_number = lineNumber;
+            requestError.level = 2;
+
+            request.errors.Add(requestError);
+            return request;
         }
 
-        public Task<LegacyRequest> AddWarningAsync(LegacyRequest request, int lineNumber, string message)
+        public async Task<LegacyRequest> AddWarningAsync(LegacyRequest request, int lineNumber, string message)
         {
-            throw new NotImplementedException();
+            LegacyRequestError requestError = new LegacyRequestError();
+            requestError.request = request;
+            requestError.request_id = request.request_id;
+            requestError.request_error_id = Guid.NewGuid();
+            requestError.message = message;
+            requestError.line_number = lineNumber;
+            requestError.level = 1;
+
+            request.errors.Add(requestError);
+            return request;
         }
     }
 }

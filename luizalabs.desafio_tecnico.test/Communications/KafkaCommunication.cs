@@ -12,6 +12,8 @@ namespace luizalabs.desafio_tecnico.test.Communications
 {
     internal class KafkaCommunication : IKafkaCommunication
     {
+        public List<string> KafkaMessage { get; set; } = new List<string>();
+
         public async Task<DeliveryResult<Null, string>> SendPostAsync(string post, string message)
         {
             Console.WriteLine($"Kafka: {post}");
@@ -20,28 +22,28 @@ namespace luizalabs.desafio_tecnico.test.Communications
 
         public async Task<object> SendProcessDataAsync(Guid requestLineId)
         {
-            Console.WriteLine($"Kafka: ProcessData");
+            KafkaMessage.Add("SendProcessDataAsync");
 
             return Task.CompletedTask;
         }
 
         public async Task<object> SendProcessFileAsync(string fileName, Guid requestId)
         {
-            Console.WriteLine($"Kafka: ProcessFile");
+            KafkaMessage.Add("SendProcessFileAsync");
 
             return Task.CompletedTask;
         }
 
         public async Task<object> SendProcessFinalAsync(Guid requestId)
         {
-            Console.WriteLine($"Kafka: ProcessFinal");
+            KafkaMessage.Add("SendProcessFinalAsync");
 
             return Task.CompletedTask;
         }
 
         public async Task<object> SendProcessLineAsync(string line, int linePosition, Guid requestId)
         {
-            Console.WriteLine($"Kafka: ProcessLine");
+            KafkaMessage.Add("SendProcessLineAsync");
 
             return Task.CompletedTask;
         }

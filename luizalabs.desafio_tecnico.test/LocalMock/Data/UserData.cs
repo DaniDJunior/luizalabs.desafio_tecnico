@@ -53,14 +53,9 @@ namespace luizalabs.desafio_tecnico.test.LocalMock.Data
             return user;
         }
 
-        public async Task<List<User>> GetListByRequestIdAsync(Guid id, bool load)
+        public async Task<List<User>> GetListByRequestIdAsync(Guid id, string? user_name, DateTime? datemin, DateTime? datemax)
         {
             return Users;
-        }
-
-        public Task<List<User>> GetListByRequestIdAsync(Guid id)
-        {
-            throw new NotImplementedException();
         }
     }
 }

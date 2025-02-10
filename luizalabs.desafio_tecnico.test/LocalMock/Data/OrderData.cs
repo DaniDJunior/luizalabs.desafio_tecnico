@@ -53,9 +53,10 @@ namespace luizalabs.desafio_tecnico.test.LocalMock.Data
             return order;
         }
 
-        public Task<Order> AddProductAsync(Order order, OrderProduct product)
+        public async Task<Order> AddProductAsync(Order order, OrderProduct product)
         {
-            throw new NotImplementedException();
+            order.products.Add(product);
+            return order;
         }
     }
 }

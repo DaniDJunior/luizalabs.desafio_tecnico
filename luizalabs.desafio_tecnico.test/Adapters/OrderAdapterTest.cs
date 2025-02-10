@@ -33,32 +33,23 @@ namespace luizalabs.desafio_tecnico.test.Adapters
         [TestMethod]
         public void ToViewProduct()
         {
-            //Order order = OrderSample.Sample();
+            Order order = OrderSample.Sample();
 
-            //int sampleSize = 5;
+            int sampleSize = 5;
 
-            //float total = 0;
+            float total = 0;
 
-            //for (int i = 0; i < sampleSize; i++)
-            //{
-            //    OrderProduct product = ProductSample.Sample();
+            for (int i = 0; i < sampleSize; i++)
+            {
+                order = OrderSample.SampleAddProduct(order);
+            }
 
-            //    total += product.value;
+            OrderView productVies = OrderAdapter.ToView(order);
 
-            //    OrderProduct orderProduct = new OrderProduct();
-            //    orderProduct.product = product;
-            //    orderProduct.product_id = product.product_id;
-            //    orderProduct.order = order;
-            //    orderProduct.order_id = order.order_id;
-            //    order.products.Add(orderProduct);
-            //}
-
-            //OrderView productVies = OrderAdapter.ToView(order);
-
-            //Assert.AreEqual(order.order_id, productVies.order_id);
-            //Assert.AreEqual(order.date, productVies.date);
-            //Assert.AreEqual(sampleSize, productVies.products.Count);
-            //Assert.AreEqual(total, productVies.total);
+            Assert.AreEqual(order.order_id, productVies.order_id);
+            Assert.AreEqual(order.date, productVies.date);
+            Assert.AreEqual(sampleSize, productVies.products.Count);
+            Assert.AreEqual(order.products.Sum(x => x.value), productVies.total);
         }
 
         [TestMethod]

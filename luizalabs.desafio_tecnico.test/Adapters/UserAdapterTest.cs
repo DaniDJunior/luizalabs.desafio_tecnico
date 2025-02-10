@@ -33,6 +33,31 @@ namespace luizalabs.desafio_tecnico.test.Adapters
         }
 
         [TestMethod]
+        public void ToLegacyView()
+        {
+            User user = UserSample.Sample();
+
+            Models.Order.Order order1 = OrderSample.Sample();
+            order1 = OrderSample.SampleAddProduct(order1);
+            order1 = OrderSample.SampleAddProduct(order1);
+            order1 = OrderSample.SampleAddProduct(order1);
+
+            Models.Order.Order order2 = OrderSample.Sample();
+            order2 = OrderSample.SampleAddProduct(order2);
+            order2 = OrderSample.SampleAddProduct(order2);
+            order2 = OrderSample.SampleAddProduct(order2);
+
+            user.orders.Add(order1);
+            user.orders.Add(order2);
+
+            UserLegacyView userVies = UserAdapter.ToViewLegacy(user);
+
+            Assert.AreEqual(user.legacy_user_id, userVies.user_id);
+            Assert.AreEqual(user.name, userVies.name);
+            Assert.AreEqual(user.orders.Count, userVies.orders.Count);
+        }
+
+        [TestMethod]
         public void ToListView()
         {
             int sampleSize = 5;
